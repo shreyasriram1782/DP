@@ -1,0 +1,112 @@
+# Problem: Longest Palindromic Substring
+#
+# Idea:
+# The problem is to find the longest palindromic substring in a given string. Dynamic programming can be
+# utilized to solve this efficiently. We explore three approaches: Brute Force, Dynamic Programming, and
+# Expand Around Center.
+#
+# Approach 1: Brute Force
+"""
+This approach involves checking all possible substrings to find the longest palindromic substring.
+For each substring, check if it is a palindrome and update the result accordingly.
+
+Algorithm:
+1. Iterate through all possible substrings using two nested loops.
+2. For each substring, check if it is a palindrome.
+3. Update the result with the maximum length palindrome found.
+
+Time Complexity: O(n^3) - Checking each substring involves O(n) operations, and there are O(n^2) substrings.
+Space Complexity: O(1) - Constant space is used.
+"""
+def longestPalindrome_brute_force(s):
+    def is_palindrome(substring):
+        return substring == substring[::-1]
+
+    n = len(s)
+    result = ""
+
+    for i in range(n):
+        for j in range(i, n):
+            current_substring = s[i:j + 1]
+            if is_palindrome(current_substring) and len(current_substring) > len(result):
+                result = current_substring
+
+    return result
+
+
+# Approach 2: Dynamic Programming
+"""
+This approach utilizes dynamic programming to find the longest palindromic substring.
+A 2D table is used to store whether the substring from index 'i' to 'j' is a palindrome.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store whether substrings are palindromes.
+2. Iterate through substrings of different lengths, updating 'dp' accordingly.
+3. Keep track of the longest palindromic substring found.
+
+Time Complexity: O(n^2) - Filling the dp table involves O(n^2) operations.
+Space Complexity: O(n^2) - 2D dp table.
+"""
+def longestPalindrome_dynamic_programming(s):
+    n = len(s)
+    dp = [[False] * n for _ in range(n)]
+    start, max_length = 0, 1
+
+    # All substrings of length 1 are palindromes
+    for i in range(n):
+        dp[i][i] = True
+
+    # Check substrings of length 2
+    for i in range(n - 1):
+        if s[i] == s[i + 1]:
+            dp[i][i + 1] = True
+            start = i
+            max_length = 2
+
+    # Check substrings of length 3 or more
+    for length in range(3, n + 1):
+        for i in range(n - length + 1):
+            j = i + length - 1
+            if dp[i + 1][j - 1] and s[i] == s[j]:
+                dp[i][j] = True
+                start = i
+                max_length = length
+
+    return s[start:start + max_length]
+
+
+# Approach 3: Expand Around Center
+"""
+This approach expands around each character and the space between characters to find palindromic substrings.
+For each character, it checks both odd and even length palindromes.
+
+Algorithm:
+1. Iterate through each character as the potential center of a palindrome.
+2. For each character, expand around it to find both odd and even length palindromes.
+3. Update the result with the longest palindromic substring found.
+
+Time Complexity: O(n^2) - Expanding around each character involves O(n) operations, and there are O(n) characters.
+Space Complexity: O(1) - Constant space is used.
+"""
+def longestPalindrome_expand_around_center(s):
+    def expand_around_center(left, right):
+        while left >= 0 and right < len(s) and s[left] == s[right]:
+            left -= 1
+            right += 1
+        return s[left + 1:right]
+
+    result = ""
+
+    for i in range(len(s)):
+        # Odd length palindrome
+        palindrome_odd = expand_around_center(i, i)
+        # Even length palindrome
+        palindrome_even = expand_around_center(i, i + 1)
+
+        # Update result with the longer palindrome
+        if len(palindrome_odd) > len(result):
+            result = palindrome_odd
+        if len(palindrome_even) > len(result):
+            result = palindrome_even
+
+    return result

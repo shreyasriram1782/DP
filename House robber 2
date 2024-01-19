@@ -1,0 +1,81 @@
+# Memorization (Top-Down) Approach
+def rob2_memo(nums):
+    if not nums:
+        return 0
+
+    n = len(nums)
+    memo = {}
+
+    def helper(idx):
+        if idx < 0:
+            return 0
+        if idx == 0 or idx == 1:
+            return nums[idx]
+        if idx in memo:
+            return memo[idx]
+
+        result = max(helper(idx - 2) + nums[idx], helper(idx - 1))
+        memo[idx] = result
+
+        return result
+
+    return max(helper(n - 2), helper(n - 1))
+
+# Tabular (Bottom-Up) Approach
+def rob2_tabular(nums):
+    if not nums:
+        return 0
+
+    n = len(nums)
+    if n == 1:
+        return nums[0]
+
+    # Rob the first house, not the last one
+    dp_first = [0] * n
+    dp_first[0], dp_first[1] = nums[0], max(nums[0], nums[1])
+
+    for i in range(2, n - 1):
+        dp_first[i] = max(dp_first[i - 2] + nums[i], dp_first[i - 1])
+
+    # Rob the last house, not the first one
+    dp_last = [0] * n
+    dp_last[1], dp_last[2] = nums[1], max(nums[1], nums[2])
+
+    for i in range(3, n):
+        dp_last[i] = max(dp_last[i - 2] + nums[i], dp_last[i - 1])
+
+    return max(dp_first[-2], dp_last[-1])
+
+# Space-Optimized Tabular Approach
+def rob2_space_optimized(nums):
+    if not nums:
+        return 0
+
+    n = len(nums)
+    if n == 1:
+        return nums[0]
+
+    # Rob the first house, not the last one
+    prev_first, curr_first = nums[0], max(nums[0], nums[1])
+
+    for i in range(2, n - 1):
+        temp = curr_first
+        curr_first = max(prev_first + nums[i], curr_first)
+        prev_first = temp
+
+    # Rob the last house, not the first one
+    prev_last, curr_last = nums[1], max(nums[1], nums[2])
+
+    for i in range(3, n):
+        temp = curr_last
+        curr_last = max(prev_last + nums[i], curr_last)
+        prev_last = temp
+
+    return max(curr_first, curr_last)
+
+# Example Usage
+nums = [2, 3, 2]
+
+print("Memoization Approach:", rob2_memo(nums))
+print("Tabular Approach:", rob2_tabular(nums))
+print("Space-Optimized Tabular Approach:", rob2_space_optimized(nums))

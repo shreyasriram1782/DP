@@ -1,0 +1,67 @@
+# Problem: Buy and Sell Stocks II
+
+# Approach 1: Greedy Approach
+"""
+Greedy Approach:
+- Iterate through the prices and accumulate the profit whenever there's an increase in price.
+
+Time Complexity: O(n) - Single pass through the array.
+Space Complexity: O(1) - Constant space usage.
+"""
+def max_profit_greedy(prices):
+    total_profit = 0
+
+    for i in range(1, len(prices)):
+        if prices[i] > prices[i - 1]:
+            total_profit += prices[i] - prices[i - 1]
+
+    return total_profit
+
+# Approach 2: Dynamic Programming (Bottom-Up)
+"""
+Dynamic Programming (Bottom-Up):
+- Use a bottom-up approach to find the maximum profit by considering each day.
+
+Time Complexity: O(n) - Single pass through the array.
+Space Complexity: O(n) - Extra space for the dp array.
+"""
+def max_profit_dp_bottom_up(prices):
+    n = len(prices)
+    dp = [0] * n
+
+    for i in range(1, n):
+        dp[i] = max(dp[i - 1], dp[i - 1] + prices[i] - prices[i - 1])
+
+    return dp[-1]
+
+# Approach 3: Dynamic Programming (Space-Optimized)
+"""
+Dynamic Programming (Space-Optimized):
+- Optimize space usage by keeping only the necessary variables.
+
+Time Complexity: O(n) - Single pass through the array.
+Space Complexity: O(1) - Constant space usage.
+"""
+def max_profit_dp_space_optimized(prices):
+    total_profit = 0
+
+    for i in range(1, len(prices)):
+        if prices[i] > prices[i - 1]:
+            total_profit += prices[i] - prices[i - 1]
+
+    return total_profit
+
+# Example usage:
+stock_prices = [7, 1, 5, 3, 6, 4]
+
+# Approach 1: Greedy Approach
+result_greedy = max_profit_greedy(stock_prices)
+print(f"Greedy Approach: {result_greedy}")
+
+# Approach 2: Dynamic Programming (Bottom-Up)
+result_dp_bottom_up = max_profit_dp_bottom_up(stock_prices)
+print(f"Dynamic Programming (Bottom-Up) Approach: {result_dp_bottom_up}")
+
+# Approach 3: Dynamic Programming (Space-Optimized)
+result_dp_space_optimized = max_profit_dp_space_optimized(stock_prices)
+print(f"Dynamic Programming (Space-Optimized) Approach: {result_dp_space_optimized}")

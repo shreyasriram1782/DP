@@ -1,0 +1,112 @@
+# Approach 1: Memoization
+"""
+This approach uses a recursive function with memoization to determine if there exists a subset
+of the given set whose sum is equal to the target sum. Starting from the end of the set, we explore
+two possibilities at each step - including or excluding the current element. The result is stored in
+a memoization table to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current index and remaining target sum as parameters.
+2. Base case: If the target sum becomes zero, return True (subset found).
+3. If the result for the current state is already memoized, return it.
+4. Explore two possibilities - include or exclude the current element.
+5. Memoize the result and return it.
+
+Time Complexity: O(len(nums) * target) - Each subproblem is solved once, and memoization avoids redundant calculations.
+Space Complexity: O(len(nums) * target) - Memoization table.
+"""
+def canPartition_top_down(nums):
+    total_sum = sum(nums)
+
+    if total_sum % 2 != 0:
+        return False
+
+    target_sum = total_sum // 2
+    memo = {}
+
+    def helper(index, remaining_sum):
+        if remaining_sum == 0:
+            return True
+
+        if (index, remaining_sum) in memo:
+            return memo[(index, remaining_sum)]
+
+        if index < 0 or remaining_sum < 0:
+            return False
+
+        include_current = helper(index - 1, remaining_sum - nums[index])
+        exclude_current = helper(index - 1, remaining_sum)
+
+        memo[(index, remaining_sum)] = include_current or exclude_current
+        return memo[(index, remaining_sum)]
+
+    return helper(len(nums) - 1, target_sum)
+
+
+# Approach 2: Bottom-Up
+"""
+The bottom-up approach uses dynamic programming to iteratively determine if there exists a subset
+of the given set whose sum is equal to the target sum. We build a 2D table to store the results.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store whether there exists a subset for each index and target sum.
+2. Set 'dp[i][j]' to True if there exists a subset in the first 'i' elements whose sum is equal to 'j'.
+3. Iterate through indices and target sums, updating 'dp' based on two possibilities - including or excluding
+   the current element.
+4. The final result is stored in 'dp[len(nums)][target_sum]'.
+
+Time Complexity: O(len(nums) * target) - Each subproblem is solved once.
+Space Complexity: O(len(nums) * target) - 2D table.
+"""
+def canPartition_bottom_up(nums):
+    total_sum = sum(nums)
+
+    if total_sum % 2 != 0:
+        return False
+
+    target_sum = total_sum // 2
+    rows, cols = len(nums) + 1, target_sum + 1
+    dp = [[False] * cols for _ in range(rows)]
+
+    for i in range(rows):
+        dp[i][0] = True
+
+    for i in range(1, rows):
+        for j in range(1, cols):
+            dp[i][j] = dp[i - 1][j] or (j >= nums[i - 1] and dp[i - 1][j - nums[i - 1]])
+
+    return dp[len(nums)][target_sum]
+
+
+# Approach 3: Space-Optimized Bottom-Up
+"""
+The space-optimized bottom-up approach reduces the space complexity by only storing the
+results for the current and previous rows. We use two arrays to represent the 'current' and 'previous'
+rows of the 2D table.
+
+Algorithm:
+1. Initialize arrays 'cur' and 'prev' to store whether there exists a subset for each target sum.
+2. Iterate through indices and target sums, updating 'cur' based on two possibilities - including or excluding
+   the current element.
+3. Update 'prev' with the values from 'cur' for the next iteration.
+4. The final result is stored in 'cur[target_sum]'.
+
+Time Complexity: O(len(nums) * target) - Each subproblem is solved once.
+Space Complexity: O(target) - Two arrays for 'cur' and 'prev'.
+"""
+def canPartition_space_optimized(nums):
+    total_sum = sum(nums)
+
+    if total_sum % 2 != 0:
+        return False
+
+    target_sum = total_sum // 2
+    prev, cur = [False] * (target_sum + 1), [False] * (target_sum + 1)
+    cur[0] = True
+
+    for num in nums:
+        prev, cur = cur, prev
+        for j in range(1, target_sum + 1):
+            cur[j] = prev[j] or (j >= num and prev[j - num])
+
+    return cur[target_sum]

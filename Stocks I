@@ -1,0 +1,111 @@
+# Problem Statement:
+# Given an array `prices` where `prices[i]` is the price of a given stock on day `i`,
+# design an algorithm to find the maximum profit. You may complete as many transactions as you like
+# (buy and sell multiple times), but you must not engage in multiple transactions simultaneously
+# (i.e., you must sell the stock before you buy again).
+
+# Approach 1: Naive Recursive Approach
+def max_profit_recursive(prices, day, has_stock):
+    """
+    Naive Recursive Approach:
+    - At each day, we have two choices: either do nothing or perform a transaction (buy or sell).
+    - Recursively explore both options and choose the one that yields maximum profit.
+
+    Time Complexity: O(2^n) - Exponential, as we have 2 choices at each step, and there are n steps.
+    Space Complexity: O(n) - Depth of the recursion stack.
+    """
+    if day == len(prices):
+        return 0
+
+    do_nothing = max_profit_recursive(prices, day + 1, has_stock)
+    transaction = 0
+    if has_stock:
+        transaction = prices[day] + max_profit_recursive(prices, day + 1, False)
+    else:
+        transaction = -prices[day] + max_profit_recursive(prices, day + 1, True)
+
+    return max(do_nothing, transaction)
+
+# Approach 2: Memoization (Top-Down Dynamic Programming)
+def max_profit_memoization(prices, day, has_stock, memo):
+    """
+    Memoization (Top-Down Dynamic Programming):
+    - Use a memoization table to store the results of subproblems to avoid redundant calculations.
+
+    Time Complexity: O(n)
+    Space Complexity: O(n)
+    """
+    if day == len(prices):
+        return 0
+
+    if (day, has_stock) in memo:
+        return memo[(day, has_stock)]
+
+    do_nothing = max_profit_memoization(prices, day + 1, has_stock, memo)
+    transaction = 0
+    if has_stock:
+        transaction = prices[day] + max_profit_memoization(prices, day + 1, False, memo)
+    else:
+        transaction = -prices[day] + max_profit_memoization(prices, day + 1, True, memo)
+
+    memo[(day, has_stock)] = max(do_nothing, transaction)
+    return memo[(day, has_stock)]
+
+# Approach 3: Bottom-Up Dynamic Programming
+def max_profit_bottom_up(prices):
+    """
+    Bottom-Up Dynamic Programming:
+    - Build the solution from the bottom by solving subproblems in a specific order.
+
+    Time Complexity: O(n)
+    Space Complexity: O(n)
+    """
+    n = len(prices)
+    dp = [[0, 0] for _ in range(n + 1)]
+
+    for day in range(n - 1, -1, -1):
+        dp[day][0] = max(dp[day + 1][0], dp[day + 1][1])
+        dp[day][1] = max(prices[day] + dp[day + 1][0], -prices[day] + dp[day + 1][1])
+
+    return dp[0][0]
+
+# Approach 4: Space-Optimized Dynamic Programming
+def max_profit_space_optimized(prices):
+    """
+    Space-Optimized Dynamic Programming:
+    - Optimize space usage by keeping only the necessary variables instead of a full table.
+
+    Time Complexity: O(n)
+    Space Complexity: O(1)
+    """
+    n = len(prices)
+    prev_sell = 0
+    prev_buy = float('-inf')
+
+    for day in range(n - 1, -1, -1):
+        current_sell = max(prev_sell, prev_buy + prices[day])
+        current_buy = max(prev_buy, prev_sell - prices[day])
+
+        prev_sell, prev_buy = current_sell, current_buy
+
+    return prev_sell
+
+# Example usage:
+stock_prices = [7, 1, 5, 3, 6, 4]
+
+# Approach 1: Naive Recursive Approach
+result_recursive = max_profit_recursive(stock_prices, 0, False)
+print(f"Naive Recursive Approach: {result_recursive}")
+
+# Approach 2: Memoization (Top-Down Dynamic Programming)
+memo = {}
+result_memoization = max_profit_memoization(stock_prices, 0, False, memo)
+print(f"Memoization Approach: {result_memoization}")
+
+# Approach 3: Bottom-Up Dynamic Programming
+result_bottom_up = max_profit_bottom_up(stock_prices)
+print(f"Bottom-Up Dynamic Programming Approach: {result_bottom_up}")
+
+# Approach 4: Space-Optimized Dynamic Programming
+result_space_optimized = max_profit_space_optimized(stock_prices)
+print(f"Space-Optimized Dynamic Programming Approach: {result_space_optimized}")

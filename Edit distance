@@ -1,0 +1,126 @@
+# Problem: Edit Distance
+
+# Idea:
+The problem is to find the minimum number of operations required to convert one string into another.
+Dynamic programming can be used to solve this efficiently. We explore three approaches: Brute Force,
+Dynamic Programming (Top-Down), and Dynamic Programming (Bottom-Up).
+
+# Approach 1: Brute Force
+"""
+This approach involves checking all possible operations (insertion, deletion, or substitution) at each position.
+
+Algorithm:
+1. Define a recursive helper function that takes the current indices of both strings as parameters.
+2. Base cases: If one of the indices reaches the end, return the remaining length of the other string.
+3. If the characters at the current indices match, move to the next indices.
+4. Otherwise, try all possible operations (insertion, deletion, substitution) and choose the minimum.
+
+Time Complexity: O(3^(m+n)) - Exponential time complexity due to checking all possible operations at each position,
+where 'm' and 'n' are the lengths of the two input strings.
+Space Complexity: O(m+n) - Space is used for the recursive call stack.
+"""
+def minDistance_brute_force(word1, word2):
+    def helper(i, j):
+        if i == len(word1):
+            return len(word2) - j
+        if j == len(word2):
+            return len(word1) - i
+
+        if word1[i] == word2[j]:
+            return helper(i + 1, j + 1)
+
+        insert = 1 + helper(i, j + 1)
+        delete = 1 + helper(i + 1, j)
+        substitute = 1 + helper(i + 1, j + 1)
+
+        return min(insert, delete, substitute)
+
+    return helper(0, 0)
+
+
+# Approach 2: Dynamic Programming (Top-Down)
+"""
+This top-down dynamic programming approach uses recursion with memoization to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current indices of both strings as parameters.
+2. Base cases: If one of the indices reaches the end, return the remaining length of the other string.
+3. If the result for the current indices is already memoized, return it.
+4. If the characters at the current indices match, move to the next indices.
+5. Otherwise, try all possible operations (insertion, deletion, substitution) and choose the minimum.
+6. Memoize the result and return it.
+
+Time Complexity: O(m * n) - Each subproblem is solved once, and memoization avoids redundant calculations,
+where 'm' and 'n' are the lengths of the two input strings.
+Space Complexity: O(m * n) - Memoization table.
+"""
+def minDistance_top_down(word1, word2):
+    memo = {}
+
+    def helper(i, j):
+        if i == len(word1):
+            return len(word2) - j
+        if j == len(word2):
+            return len(word1) - i
+
+        if (i, j) in memo:
+            return memo[(i, j)]
+
+        if word1[i] == word2[j]:
+            result = helper(i + 1, j + 1)
+        else:
+            insert = 1 + helper(i, j + 1)
+            delete = 1 + helper(i + 1, j)
+            substitute = 1 + helper(i + 1, j + 1)
+            result = min(insert, delete, substitute)
+
+        memo[(i, j)] = result
+        return result
+
+    return helper(0, 0)
+
+
+# Approach 3: Dynamic Programming (Bottom-Up)
+"""
+This bottom-up dynamic programming approach builds a 2D table to store the results of subproblems.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store the minimum distance for different indices.
+2. Iterate through indices and update 'dp' based on whether the characters at the current indices match.
+3. The final result is stored in 'dp[0][0]'.
+
+Time Complexity: O(m * n) - Each subproblem is solved once.
+Space Complexity: O(m * n) - 2D table.
+"""
+def minDistance_bottom_up(word1, word2):
+    m, n = len(word1), len(word2)
+
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m, -1, -1):
+        for j in range(n, -1, -1):
+            if i == m:
+                dp[i][j] = n - j
+            elif j == n:
+                dp[i][j] = m - i
+            elif word1[i] == word2[j]:
+                dp[i][j] = dp[i + 1][j + 1]
+            else:
+                insert = 1 + dp[i][j + 1]
+                delete = 1 + dp[i + 1][j]
+                substitute = 1 + dp[i + 1][j + 1]
+                dp[i][j] = min(insert, delete, substitute)
+
+    return dp[0][0]
+
+# Example usage:
+word1 = "horse"
+word2 = "ros"
+
+result_brute_force = minDistance_brute_force(word1, word2)
+result_top_down = minDistance_top_down(word1, word2)
+result_bottom_up = minDistance_bottom_up(word1, word2)
+
+print(result_brute_force)   # Output: 3
+print(result_top_down)      # Output: 3
+print(result_bottom_up)     # Output: 3

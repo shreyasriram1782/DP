@@ -1,0 +1,46 @@
+# Memorization (Top-Down) Approach
+def uniquePaths_memo(m, n, memo=None):
+    if memo is None:
+        memo = {}
+
+    if m == 1 or n == 1:
+        return 1
+
+    if (m, n) in memo:
+        return memo[(m, n)]
+
+    memo[(m, n)] = uniquePaths_memo(m - 1, n, memo) + uniquePaths_memo(m, n - 1, memo)
+
+    return memo[(m, n)]
+
+# Tabular (Bottom-Up) Approach
+def uniquePaths_tabular(m, n):
+    dp_tabular = [[0] * n for _ in range(m)]
+
+    for i in range(m):
+        for j in range(n):
+            if i == 0 or j == 0:
+                dp_tabular[i][j] = 1
+            else:
+                dp_tabular[i][j] = dp_tabular[i - 1][j] + dp_tabular[i][j - 1]
+
+    return dp_tabular[-1][-1]
+
+# Space-Optimized Tabular Approach
+def uniquePaths_space_optimized(m, n):
+    if m == 0 or n == 0:
+        return 0
+
+    dp_space_optimized = [1] * n
+
+    for i in range(1, m):
+        for j in range(1, n):
+            dp_space_optimized[j] += dp_space_optimized[j - 1]
+
+    return dp_space_optimized[-1]
+
+# Example Usage
+rows, cols = 3, 7
+print("Memoization Approach:", uniquePaths_memo(rows, cols))
+print("Tabular Approach:", uniquePaths_tabular(rows, cols))
+print("Space-Optimized Tabular Approach:", uniquePaths_space_optimized(rows, cols))

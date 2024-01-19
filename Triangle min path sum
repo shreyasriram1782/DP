@@ -1,0 +1,85 @@
+# Approach 1: Memoization
+"""
+This approach uses a recursive function with memoization to find the minimum path sum.
+Starting from the top of the triangle, for each cell, we calculate the minimum path sum
+by considering the two possible paths below it. The result is stored in a memoization table
+to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current row and column as parameters.
+2. Base case: If the row reaches the bottom of the triangle, return 0.
+3. Check if the result for the current cell is already memoized, return it if found.
+4. Calculate the minimum path sum by considering both paths below the current cell.
+5. Memoize the result and return it.
+
+Time Complexity: O(N^2) - Each cell is visited once, and memoization avoids redundant calculations.
+Space Complexity: O(N^2) - Memoization table.
+"""
+def minimumTotal_top_down(triangle):
+    memo = {}
+
+    def helper(row, col):
+        if row == len(triangle):
+            return 0
+
+        if (row, col) in memo:
+            return memo[(row, col)]
+
+        current_value = triangle[row][col]
+        left_sum = current_value + helper(row + 1, col)
+        right_sum = current_value + helper(row + 1, col + 1)
+
+        memo[(row, col)] = min(left_sum, right_sum)
+        return memo[(row, col)]
+
+    return helper(0, 0)
+
+
+# Approach 2: Bottom-Up
+"""
+The bottom-up approach iteratively builds the minimum path sum starting from the bottom
+of the triangle. We update each cell by adding the minimum of the two paths below it.
+This process is performed row by row until we reach the top.
+
+Algorithm:
+1. Iterate through the rows of the triangle from bottom to top.
+2. For each cell, update its value by adding the minimum of the two paths below it.
+3. The final result is stored in the top cell of the triangle.
+
+Time Complexity: O(N^2) - Each cell is visited once.
+Space Complexity: O(1) - No additional space is used.
+"""
+def minimumTotal_bottom_up(triangle):
+    rows = len(triangle)
+
+    for row in range(rows - 2, -1, -1):
+        for col in range(len(triangle[row])):
+            triangle[row][col] += min(triangle[row + 1][col], triangle[row + 1][col + 1])
+
+    return triangle[0][0]
+
+
+# Approach 3: Space-Optimized Bottom-Up
+"""
+The space-optimized bottom-up approach avoids using the original triangle for storage.
+Instead, we maintain a 1D array to store the minimum path sum for each cell in the current row.
+We iteratively update this array as we move up the triangle.
+
+Algorithm:
+1. Initialize a 1D array 'dp' with the values of the bottom row of the triangle.
+2. Iterate through the rows from bottom to top.
+3. For each cell, update 'dp' by adding the minimum of the two paths below it.
+4. The final result is stored in the first element of 'dp'.
+
+Time Complexity: O(N^2) - Each cell is visited once.
+Space Complexity: O(N) - Space-optimized, using a 1D array.
+"""
+def minimumTotal_space_optimized(triangle):
+    rows = len(triangle)
+    dp = triangle[-1]
+
+    for row in range(rows - 2, -1, -1):
+        for col in range(len(triangle[row])):
+            dp[col] = triangle[row][col] + min(dp[col], dp[col + 1])
+
+    return dp[0]

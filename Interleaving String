@@ -1,0 +1,157 @@
+# Problem: Interleaving String
+#
+# Idea:
+# The problem is to determine if a third string is formed by interleaving the characters of two other strings.
+# Dynamic programming can be utilized to solve this efficiently. We explore four approaches: Brute Force,
+# Dynamic Programming (Top-Down), Dynamic Programming (Bottom-Up), and Dynamic Programming (Bottom-Up with Space Optimization).
+#
+# Approach 1: Brute Force
+"""
+This approach involves checking all possible interleavings of two strings and comparing them with the third string.
+
+Algorithm:
+1. Define a recursive helper function that takes the current indices of all three strings as parameters.
+2. Base cases: If all indices reach the end, return True. If the current character of the third string
+   matches the current character of one of the other strings, recursively check the next characters.
+3. Return the result of interleaving for different possibilities.
+
+Time Complexity: O(2^(m+n)) - Exponential time complexity due to checking all possible interleavings,
+where 'm' and 'n' are the lengths of the two input strings.
+Space Complexity: O(m+n) - Space is used for the recursive call stack.
+"""
+def isInterleave_brute_force(s1, s2, s3):
+    def helper(i, j, k):
+        if i == len(s1) and j == len(s2) and k == len(s3):
+            return True
+
+        result = False
+        if i < len(s1) and s1[i] == s3[k]:
+            result = helper(i + 1, j, k + 1)
+
+        if j < len(s2) and s2[j] == s3[k]:
+            result = result or helper(i, j + 1, k + 1)
+
+        return result
+
+    return helper(0, 0, 0)
+
+
+# Approach 2: Dynamic Programming (Top-Down)
+"""
+This top-down dynamic programming approach uses recursion with memoization to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current indices of all three strings as parameters.
+2. Base cases: If all indices reach the end, return True. If the result for the current indices is already memoized, return it.
+3. If the current character of the third string matches the current character of one of the other strings,
+   recursively check the next characters. Memoize the result and return it.
+
+Time Complexity: O(m * n) - Each subproblem is solved once, and memoization avoids redundant calculations,
+where 'm' and 'n' are the lengths of the two input strings.
+Space Complexity: O(m * n) - Memoization table.
+"""
+def isInterleave_top_down(s1, s2, s3):
+    memo = {}
+
+    def helper(i, j, k):
+        if i == len(s1) and j == len(s2) and k == len(s3):
+            return True
+
+        if (i, j, k) in memo:
+            return memo[(i, j, k)]
+
+        result = False
+        if i < len(s1) and s1[i] == s3[k]:
+            result = helper(i + 1, j, k + 1)
+
+        if j < len(s2) and s2[j] == s3[k]:
+            result = result or helper(i, j + 1, k + 1)
+
+        memo[(i, j, k)] = result
+        return result
+
+    return helper(0, 0, 0)
+
+
+# Approach 3: Dynamic Programming (Bottom-Up)
+"""
+This bottom-up dynamic programming approach builds a 2D table to store the results of subproblems.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store whether interleaving is possible for different indices.
+2. Iterate through indices and update 'dp' based on whether the current character of the third string
+   matches the current characters of the other two strings.
+3. The final result is stored in 'dp[len(s1)][len(s2)]'.
+
+Time Complexity: O(m * n) - Each subproblem is solved once.
+Space Complexity: O(m * n) - 2D table.
+"""
+def isInterleave_bottom_up(s1, s2, s3):
+    if len(s1) + len(s2) != len(s3):
+        return False
+
+    dp = [[False] * (len(s2) + 1) for _ in range(len(s1) + 1)]
+
+    for i in range(len(s1) + 1):
+        for j in range(len(s2) + 1):
+            if i == 0 and j == 0:
+                dp[i][j] = True
+            elif i == 0:
+                dp[i][j] = dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]
+            elif j == 0:
+                dp[i][j] = dp[i - 1][j] and s1[i - 1] == s3[i + j - 1]
+            else:
+                dp[i][j] = (dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]) or \
+                           (dp[i - 1][j] and s1[i - 1] == s3[i + j - 1])
+
+    return dp[len(s1)][len(s2)]
+
+
+# Approach 4: Dynamic Programming (Bottom-Up with Space Optimization)
+"""
+This space-optimized bottom-up dynamic programming approach builds a 1D array to store the results of subproblems.
+
+Algorithm:
+1. Initialize a 1D array 'dp' to store whether interleaving is possible for different indices.
+2. Iterate through indices and update 'dp' based on whether the current character of the third string
+   matches the current characters of the other two strings.
+3. The final result is stored in 'dp[len(s2)]'.
+
+Time Complexity: O(m * n) - Each subproblem is solved once.
+Space Complexity: O(min(m, n)) - 1D array.
+"""
+def isInterleave_bottom_up_space_optimized(s1, s2, s3):
+    if len(s1) + len(s2) != len(s3):
+        return False
+
+    # Use a 1D array to store results for the current row
+    dp = [False] * (len(s2) + 1)
+
+    for i in range(len(s1) + 1):
+        for j in range(len(s2) + 1):
+            if i == 0 and j == 0:
+                dp[j] = True
+            elif i == 0:
+                dp[j] = dp[j - 1] and s2[j - 1] == s3[i + j - 1]
+            elif j == 0:
+                dp[j] = dp[j] and s1[i - 1] == s3[i + j - 1]
+            else:
+                dp[j] = (dp[j - 1] and s2[j - 1] == s3[i + j - 1]) or \
+                        (dp[j] and s1[i - 1] == s3[i + j - 1])
+
+    return dp[len(s2)]
+
+# Example usage:
+s1 = "aabcc"
+s2 = "dbbca"
+s3 = "aadbbcbcac"
+
+result_brute_force = isInterleave_brute_force(s1, s2, s3)
+result_top_down = isInterleave_top_down(s1, s2, s3)
+result_bottom_up = isInterleave_bottom_up(s1, s2, s3)
+result_space_optimized = isInterleave_bottom_up_space_optimized(s1, s2, s3)
+
+print(result_brute_force)       # Output: True
+print(result_top_down)          # Output: True
+print(result_bottom_up)         # Output: True
+print(result_space_optimized)   # Output: True

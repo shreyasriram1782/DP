@@ -1,0 +1,77 @@
+# Top-Down (Memorization) Approach
+def uniquePathsWithObstacles_top_down(obstacleGrid):
+    if not obstacleGrid or not obstacleGrid[0]:
+        return 0
+
+    m, n = len(obstacleGrid), len(obstacleGrid[0])
+    memo = {}
+
+    def helper(i, j):
+        if i < 0 or j < 0:
+            return 0
+
+        if obstacleGrid[i][j] == 1:
+            return 0
+
+        if (i, j) in memo:
+            return memo[(i, j)]
+
+        if i == 0 and j == 0:
+            return 1
+
+        paths = helper(i - 1, j) + helper(i, j - 1)
+        memo[(i, j)] = paths
+
+        return paths
+
+    return helper(m - 1, n - 1)
+
+# Bottom-Up (Tabular) Approach
+def uniquePathsWithObstacles_tabular(obstacleGrid):
+    if not obstacleGrid or not obstacleGrid[0]:
+        return 0
+
+    m, n = len(obstacleGrid), len(obstacleGrid[0])
+
+    dp_tabular = [[0] * n for _ in range(m)]
+
+    for i in range(m):
+        for j in range(n):
+            if obstacleGrid[i][j] == 1:
+                dp_tabular[i][j] = 0
+            elif i == 0 and j == 0:
+                dp_tabular[i][j] = 1
+            else:
+                dp_tabular[i][j] = (dp_tabular[i - 1][j] if i > 0 else 0) + (dp_tabular[i][j - 1] if j > 0 else 0)
+
+    return dp_tabular[-1][-1]
+
+# Space-Optimized Tabular Approach
+def uniquePathsWithObstacles_space_optimized(obstacleGrid):
+    if not obstacleGrid or not obstacleGrid[0]:
+        return 0
+
+    m, n = len(obstacleGrid), len(obstacleGrid[0])
+
+    dp_space_optimized = [0] * n
+    dp_space_optimized[0] = 1
+
+    for i in range(m):
+        for j in range(n):
+            if obstacleGrid[i][j] == 1:
+                dp_space_optimized[j] = 0
+            elif j > 0:
+                dp_space_optimized[j] += dp_space_optimized[j - 1]
+
+    return dp_space_optimized[-1]
+
+# Example Usage:
+obstacleGrid = [
+    [0, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0]
+]
+
+print("Top-Down (Memorization) Approach:", uniquePathsWithObstacles_top_down(obstacleGrid))
+print("Bottom-Up (Tabular) Approach:", uniquePathsWithObstacles_tabular(obstacleGrid))
+print("Space-Optimized Tabular Approach:", uniquePathsWithObstacles_space_optimized(obstacleGrid))

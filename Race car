@@ -1,0 +1,100 @@
+# Approach 1: Memoization
+"""
+This approach uses a recursive function with memoization to find the minimum steps to reach
+the target position. Starting from the initial position, we explore both forward and backward
+movements at each step. The result is stored in a memoization table to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current position and speed as parameters.
+2. Base case: If the position reaches the target, return 0.
+3. If the result for the current state is already memoized, return it.
+4. Calculate the minimum steps by exploring both forward and backward movements.
+5. Memoize the result and return it.
+
+Time Complexity: O(target * log(target)) - Each state is visited once, and memoization avoids redundant calculations.
+Space Complexity: O(target * log(target)) - Memoization table.
+"""
+def racecar_top_down(target):
+    memo = {}
+
+    def helper(position, speed):
+        if (position, speed) in memo:
+            return memo[(position, speed)]
+
+        if position == target:
+            return 0
+
+        forward_steps = 1 + helper(position + speed, speed * 2)
+        backward_steps = 1 + helper(position, -1 if speed > 0 else 1)
+
+        memo[(position, speed)] = min(forward_steps, backward_steps)
+        return memo[(position, speed)]
+
+    return helper(0, 1)
+
+
+# Approach 2: Bottom-Up
+"""
+The bottom-up approach uses dynamic programming to iteratively find the minimum steps to reach
+the target position. We build a 2D table to store the results for each state.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store the minimum steps for each state.
+2. Iterate through all possible positions and speeds.
+3. For each state, calculate the minimum steps by exploring both forward and backward movements.
+4. The result is stored in the last column of the first row.
+
+Time Complexity: O(target * log(target)) - Each state is visited once.
+Space Complexity: O(target * log(target)) - 2D table.
+"""
+def racecar_bottom_up(target):
+    max_position = target * 2 + 1
+    dp = [[float('inf')] * max_position for _ in range(2)]
+
+    for pos in range(max_position):
+        dp[0][pos] = min(dp[0][pos], 2 * pos)
+        dp[1][pos] = min(dp[1][pos], 2 * pos + 1)
+
+    for steps in range(1, target.bit_length() + 1):
+        for pos in range(max_position):
+            forward_steps = 2 ** steps - 1 + dp[1][max(0, pos - 2 ** (steps - 1))]
+            backward_steps = steps + 1 + dp[0][pos]
+
+            dp[0][pos] = min(dp[0][pos], forward_steps)
+            dp[1][pos] = min(dp[1][pos], backward_steps)
+
+    return min(dp[0][target], dp[1][target])
+
+
+# Approach 3: Space-Optimized Bottom-Up
+"""
+The space-optimized bottom-up approach reduces the space complexity by only storing the
+results for the current and previous states. We use two arrays to represent the 'current'
+and 'previous' rows of the 2D table.
+
+Algorithm:
+1. Initialize arrays 'cur' and 'prev' to store the minimum steps for each state.
+2. Iterate through all possible positions and speeds.
+3. For each state, calculate the minimum steps by exploring both forward and backward movements.
+4. Update 'prev' with the values from 'cur' for the next iteration.
+
+Time Complexity: O(target * log(target)) - Each state is visited once.
+Space Complexity: O(target * log(target)) - Two arrays for 'cur' and 'prev'.
+"""
+def racecar_space_optimized(target):
+    max_position = target * 2 + 1
+    cur, prev = [float('inf')] * max_position, [float('inf')] * max_position
+
+    for pos in range(max_position):
+        cur[pos] = min(cur[pos], 2 * pos)
+        prev[pos] = min(prev[pos], 2 * pos + 1)
+
+    for steps in range(1, target.bit_length() + 1):
+        for pos in range(max_position):
+            forward_steps = 2 ** steps - 1 + prev[max(0, pos - 2 ** (steps - 1))]
+            backward_steps = steps + 1 + cur[pos]
+
+            cur[pos] = min(cur[pos], forward_steps)
+            prev[pos] = min(prev[pos], backward_steps)
+
+    return min(cur[target], prev[target])

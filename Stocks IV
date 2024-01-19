@@ -1,0 +1,99 @@
+# Problem: Buy and Sell Stocks IV
+
+# Approach 1: Memoization
+"""
+Memoization Approach:
+- Use memoization to store intermediate results for subproblems.
+
+Time Complexity: O(n * k)
+Space Complexity: O(n * k) - Extra space for the memoization table.
+"""
+def max_profit_memoization(k, prices):
+    n = len(prices)
+    memo = {}
+
+    def helper(index, transactions_left, has_stock):
+        if index >= n or transactions_left == 0:
+            return 0
+
+        if (index, transactions_left, has_stock) in memo:
+            return memo[(index, transactions_left, has_stock)]
+
+        # Option 1: Do nothing
+        do_nothing = helper(index + 1, transactions_left, has_stock)
+
+        # Option 2: Buy or sell
+        transaction = 0
+        if has_stock:
+            transaction = prices[index] + helper(index + 1, transactions_left - 1, False)
+        else:
+            transaction = -prices[index] + helper(index + 1, transactions_left, True)
+
+        memo[(index, transactions_left, has_stock)] = max(do_nothing, transaction)
+        return memo[(index, transactions_left, has_stock)]
+
+    return helper(0, k * 2, False)
+
+# Approach 2: Bottom-Up Dynamic Programming
+"""
+Bottom-Up Dynamic Programming:
+- Use a bottom-up approach to calculate the maximum profit for each state.
+
+Time Complexity: O(n * k)
+Space Complexity: O(n * k) - Extra space for the dp table.
+"""
+def max_profit_bottom_up(k, prices):
+    n = len(prices)
+    if n <= 1:
+        return 0
+
+    dp = [[[0, 0] for _ in range(2 * k + 1)] for _ in range(n)]
+
+    for i in range(n):
+        for j in range(2 * k, 0, -1):
+            # Option 1: Do nothing
+            dp[i][j][0] = max(dp[i - 1][j][0], dp[i - 1][j][1])
+
+            # Option 2: Buy or sell
+            dp[i][j][1] = max(dp[i - 1][j][1], dp[i - 1][j - 1][0] - prices[i])
+
+    return dp[n - 1][2 * k][0]
+
+# Approach 3: Space-Optimized Dynamic Programming
+"""
+Space-Optimized Dynamic Programming:
+- Optimize space usage by keeping only the necessary variables.
+
+Time Complexity: O(n * k)
+Space Complexity: O(k) - Constant space usage.
+"""
+def max_profit_space_optimized(k, prices):
+    n = len(prices)
+    if n <= 1:
+        return 0
+
+    buy = [float('-inf')] * (k + 1)
+    sell = [0] * (k + 1)
+
+    for price in prices:
+        for i in range(k, 0, -1):
+            buy[i] = max(buy[i], sell[i - 1] - price)
+            sell[i] = max(sell[i], buy[i] + price)
+
+    return sell[k]
+
+# Example usage:
+k_value = 2
+stock_prices_four = [3, 2, 6, 5, 0, 3]
+
+# Approach 1: Memoization
+result_memoization = max_profit_memoization(k_value, stock_prices_four)
+print(f"Memoization Approach: {result_memoization}")
+
+# Approach 2: Bottom-Up Dynamic Programming
+result_bottom_up = max_profit_bottom_up(k_value, stock_prices_four)
+print(f"Bottom-Up Dynamic Programming Approach: {result_bottom_up}")
+
+# Approach 3: Space-Optimized Dynamic Programming
+result_space_optimized = max_profit_space_optimized(k_value, stock_prices_four)
+print(f"Space-Optimized Dynamic Programming Approach: {result_space_optimized}")

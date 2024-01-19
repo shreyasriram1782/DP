@@ -1,0 +1,169 @@
+# Problem: Maximal Square
+
+# Idea:
+The problem is to find the area of the largest square containing only 1's in a binary matrix.
+Dynamic programming can be used to solve this efficiently. We explore three approaches: Brute Force,
+Dynamic Programming (Top-Down), and Dynamic Programming (Bottom-Up).
+
+# Approach 1: Brute Force
+"""
+This approach involves checking all possible squares in the matrix and finding the largest square containing only 1's.
+
+Algorithm:
+1. Iterate through each cell in the matrix.
+2. For each cell, check all possible square sizes starting from 1 and find the largest square containing only 1's.
+
+Time Complexity: O(m^2 * n^2) - Exponential time complexity due to checking all possible squares,
+where 'm' and 'n' are the dimensions of the matrix.
+Space Complexity: O(1) - Constant space is used.
+"""
+def maximalSquare_brute_force(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    max_side = 0
+
+    for i in range(m):
+        for j in range(n):
+            if matrix[i][j] == '1':
+                side = 1
+                while i + side < m and j + side < n:
+                    valid_square = True
+                    for k in range(side + 1):
+                        if matrix[i + k][j + side] == '0' or matrix[i + side][j + k] == '0':
+                            valid_square = False
+                            break
+                    if valid_square:
+                        side += 1
+                    else:
+                        break
+                max_side = max(max_side, side)
+
+    return max_side * max_side
+
+# Approach 2: Dynamic Programming (Top-Down)
+"""
+This top-down dynamic programming approach uses recursion with memoization to avoid redundant calculations.
+
+Algorithm:
+1. Define a recursive helper function that takes the current row and column as parameters.
+2. Base case: If the cell contains '0', return 0.
+3. If the result for the current cell is already memoized, return it.
+4. Recursively find the maximal square size for the cells to the right, down, and diagonally right-down.
+5. The result is the minimum of the three values plus 1.
+6. Memoize the result and return it.
+
+Time Complexity: O(m * n) - Each subproblem is solved once, and memoization avoids redundant calculations,
+where 'm' and 'n' are the dimensions of the matrix.
+Space Complexity: O(m * n) - Memoization table.
+"""
+def maximalSquare_top_down(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    memo = {}
+
+    def helper(row, col):
+        if row >= m or col >= n or matrix[row][col] == '0':
+            return 0
+
+        if (row, col) in memo:
+            return memo[(row, col)]
+
+        right = helper(row, col + 1)
+        down = helper(row + 1, col)
+        diagonal = helper(row + 1, col + 1)
+
+        memo[(row, col)] = min(right, down, diagonal) + 1
+        return memo[(row, col)]
+
+    max_side = max(helper(i, j) for i in range(m) for j in range(n))
+    return max_side * max_side
+
+# Approach 3: Dynamic Programming (Bottom-Up)
+"""
+This bottom-up dynamic programming approach builds a 2D table to store the maximal square size for each cell.
+
+Algorithm:
+1. Initialize a 2D table 'dp' to store the maximal square size for each cell.
+2. Iterate through cells in reverse order and update 'dp' based on the cells to the right, down, and diagonally right-down.
+3. The maximal square size is the minimum of the three values plus 1.
+4. The final result is the maximum value in the 'dp' table.
+
+Time Complexity: O(m * n) - Each cell is processed once.
+Space Complexity: O(m * n) - 2D table.
+"""
+def maximalSquare_bottom_up(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    dp = [[0] * n for _ in range(m)]
+    max_side = 0
+
+    for i in range(m - 1, -1, -1):
+        for j in range(n - 1, -1, -1):
+            if matrix[i][j] == '1':
+                right = dp[i][j + 1] if j + 1 < n else 0
+                down = dp[i + 1][j] if i + 1 < m else 0
+                diagonal = dp[i + 1][j + 1] if i + 1 < m and j + 1 < n else 0
+                dp[i][j] = min(right, down, diagonal) + 1
+                max_side = max(max_side, dp[i][j])
+
+    return max_side * max_side
+
+# Example usage:
+matrix = [
+    ['1', '0', '1', '0', '0'],
+    ['1', '0', '1', '1', '1'],
+    ['1', '1', '1', '1', '1'],
+    ['1', '0', '0', '1', '0']
+]
+
+result_brute_force = maximalSquare_brute_force(matrix)
+result_top_down = maximalSquare_top_down(matrix)
+result_bottom_up = maximalSquare_bottom_up(matrix)
+
+print(result_brute_force)   # Output: 4
+print(result_top_down)      # Output: 4
+print(result_bottom_up)     # Output: 4
+# Approach 4: Dynamic Programming (Space-Optimized)
+"""
+This space-optimized bottom-up dynamic programming approach uses two 1D arrays to store the maximal square size.
+
+Algorithm:
+1. Initialize two 1D arrays 'dp' and 'prev' to store the maximal square size for each cell.
+2. Iterate through cells in reverse order and update 'dp' based on the cells to the right, down, and diagonally right-down.
+3. The maximal square size is the minimum of the three values plus 1.
+4. Update 'prev' with the values from 'dp' for the next iteration.
+5. The final result is the maximum value in the 'dp' array.
+
+Time Complexity: O(m * n) - Each cell is processed once.
+Space Complexity: O(n) - Two 1D arrays for 'dp' and 'prev'.
+"""
+def maximalSquare_space_optimized(matrix):
+    if not matrix or not matrix[0]:
+        return 0
+
+    m, n = len(matrix), len(matrix[0])
+    dp = [0] * n
+    prev = 0
+    max_side = 0
+
+    for i in range(m - 1, -1, -1):
+        for j in range(n - 1, -1, -1):
+            if matrix[i][j] == '1':
+                right = dp[j + 1] if j + 1 < n else 0
+                down = dp[j] if i + 1 < m else 0
+                diagonal = prev if i + 1 < m and j + 1 < n else 0
+                dp[j], prev = min(right, down, diagonal) + 1, dp[j]
+
+                max_side = max(max_side, dp[j])
+
+    return max_side * max_side
+
+# Example usage:
+result_space_optimized = maximalSquare_space_optimized(matrix)
+print(result_space_optimized)  # Output: 4

@@ -1,0 +1,48 @@
+# Memorization (Top-Down) Approach
+def climbStairs_memo(n):
+    memo = {}
+
+    def helper(i):
+        if i <= 1:
+            return 1
+        if i in memo:
+            return memo[i]
+
+        memo[i] = helper(i - 1) + helper(i - 2)
+        return memo[i]
+
+    return helper(n)
+
+# Tabular (Bottom-Up) Approach
+def climbStairs_tabular(n):
+    if n <= 1:
+        return 1
+
+    dp = [0] * (n + 1)
+    dp[0], dp[1] = 1, 1
+
+    for i in range(2, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]
+
+    return dp[n]
+
+# Space-Optimized Tabular Approach
+def climbStairs_space_optimized(n):
+    if n <= 1:
+        return 1
+
+    prev, curr = 1, 1
+
+    for i in range(2, n + 1):
+        temp = curr
+        curr = prev + curr
+        prev = temp
+
+    return curr
+
+# Example Usage
+num_steps = 5
+
+print("Memoization Approach:", climbStairs_memo(num_steps))
+print("Tabular Approach:", climbStairs_tabular(num_steps))
+print("Space-Optimized Tabular Approach:", climbStairs_space_optimized(num_steps))
